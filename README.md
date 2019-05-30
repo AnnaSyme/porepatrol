@@ -20,7 +20,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 * Input: nanopore reads, in raw fast5 format
 * Runs: basecalling, quality control, trimming adapters, filtering and trimming. 
-* Output: fastq reads. 
+* Basic usage is: nextflow run porepatrol --reads "fast5s/\*"
+* Output: basecalled, trimmed, filtered, fastq reads in [what folder?] 
 
 ## Documentation
 The nf-core/porepatrol pipeline comes with documentation about the pipeline, found in the `docs/` directory:
