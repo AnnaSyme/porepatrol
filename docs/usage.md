@@ -54,11 +54,18 @@ NXF_OPTS='-Xms1g -Xmx4g'
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 
+For raw fast5 files:
 ```bash
-nextflow run nf-core/porepatrol --reads '*_R{1,2}.fastq.gz' -profile docker
+nextflow run nf-core/porepatrol --reads 'fast5/*' --fast5
 ```
 
-This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+For basecalled fastq files:
+```bash
+nextflow run nf-core/porepatrol --reads '*.FastQ' --basecalled
+```
+
+<!-- This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
+ -->
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -68,6 +75,34 @@ results         # Finished results (configurable, see below)
 .nextflow_log   # Log file from Nextflow
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
+
+### What are the default parameters for the tools in the workflow? How can I change them?
+
+#### For nf-core workflows in general
+
+Each of the tools in a workflow runs as per its specification in the `main.nf file`. For example, for the (fictional!) tool called amazingtool, look in main.nf, in a process, in the script block:
+
+`amazingtool --some-default-setting 25 ${params.amazingtool_args}`
+
+What are the params.amazingtool_args? Look in the nextflow.config file, in the first section that defines all the parameters:
+
+```bash
+params {
+other-parameter = false
+amazingtool_args = ""
+}
+```
+
+We can see that the default additional arguments here for amazingtool are blank. To change or add in arguments, you can specify them when you run the tool:
+
+```bash
+nextflow run workflow --reads 'path/*' --amazingtool_args "--saveoutput"
+```
+
+#### For this workflow
+
+See the last section of this document, called "other command line parameters".
+
 
 ### Updating the pipeline
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:

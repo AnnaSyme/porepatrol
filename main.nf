@@ -10,6 +10,134 @@
 */
 
 
+/*
+========================================================================================
+                         The main inputs and processes
+========================================================================================
+*/
+
+/* input reads into channel */
+Channel
+    .fromPath(params.reads)
+    .set { input }
+
+/* Basecalling */
+
+process albacore {
+    echo true
+    //add save dir here
+
+    input:
+    file x from input
+
+    output:
+    file 'tempfile.txt' into basecalled1
+    file 'tempfile.txt' into basecalled2
+    //file "pass/*.fastq" into basecalled 
+    //anything else to save?
+
+    script:
+    //how to run albacore:
+    //read_fast5_basecaller.py -i [input] -t [threads] -s [output path] -c [config file about seq chemistry]
+
+    """
+    echo albacore process with file $x
+    echo "temp" > tempfile.txt
+    """
+}
+
+/* Assess reads with nanoplot */
+
+process nanoplot {
+    echo true
+
+    input:
+    file x from basecalled1
+
+    output:
+    //not into channel? just keep for info
+
+    script:
+    // nanoplot --fastq file.fastq
+
+    """
+    echo nanoplot process with file $x
+    echo "temp2" > tempfile2.txt
+    """
+}
+
+
+/* Chop adapters */
+
+process porechop {
+    echo true
+
+    input:
+    file x from basecalled2
+    
+    output:
+    file 'tempfile3.txt' into chopped
+    //file.fastq 
+
+    script:
+    //how to run porechop:
+    //porcehop -i [fastq] -o [outdir]
+
+    """
+    echo porechop process with file $x
+    echo "temp3" > tempfile3.txt
+    """
+}
+
+
+/*  Filter poor quality and short reads */
+
+process nanofilt {
+    echo true
+
+    input: 
+    file x from chopped
+
+    output:
+    file 'tempfile4.txt' into filtered
+    //filtered.fastq
+
+    script:
+    // NanoFilt -q 10 -l 500 < chopped.fastq > filtered.fastq
+
+    """
+    echo nanofilt process with file $x
+    echo "temp4" > tempfile4.txt
+    """
+}
+
+/* Assess reads again with nanoplot */
+
+process nanoplot2 {
+    echo true
+
+    input:
+    file x from filtered
+
+    output:
+    //not into channel? just keep for info
+
+    script:
+    // nanoplot --fastq file.fastq
+
+    """
+    echo nanoplot2 process with file $x
+    echo "temp5" > tempfile5.txt
+    """
+}
+
+/*
+========================================================================================
+                         All the other parts of the script
+========================================================================================
+*/
+
+
 def helpMessage() {
     // TODO nf-core: Add to this help message with new command line parameters
     log.info nfcoreHeader()
@@ -17,13 +145,13 @@ def helpMessage() {
 
     Usage: 
 
-    nextflow run nf-core/porepatrol --reads [path to files] [filetype]
+    nextflow run nf-core/porepatrol --reads [path to files] 
 
     e.g. 
 
     Mandatory arguments:
-      --reads                       Path to input data (must be surrounded with quotes)
-      --fast5 or --basecalled       type in one of these 
+      --reads                       Path to input fast5 data (must be surrounded with quotes)
+
 
     Options:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
@@ -37,11 +165,8 @@ def helpMessage() {
     """.stripIndent()
 }
 
-/*
- * SET UP CONFIGURATION VARIABLES
- */
 
-// Show help emssage
+// Show help message
 if (params.help){
     helpMessage()
     exit 0
@@ -67,28 +192,8 @@ if( workflow.profile == 'awsbatch') {
 }
 
 // Stage config files
-ch_multiqc_config = Channel.fromPath(params.multiqc_config)
+//ch_multiqc_config = Channel.fromPath(params.multiqc_config)
 ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
-
-/*
- * Create a channel for input read files
- */
-if(params.reads){
-    if(params.fast5){
-        Channel
-            .from(params.reads)
-            .ifEmpty { exit 1, "no input files supplied"}
-            .into { inputfast5; albacore; guppy }
-    } 
-
-if(params.reads){
-    if(params.basecalled){
-        Channel
-            .from(params.reads)
-            .ifEmpty { exit 1, "no input files supplied"}
-            .into { inputfastq; porechop}
-    }
-
 
 
 // Header log info
@@ -98,8 +203,8 @@ if(workflow.revision) summary['Pipeline Release'] = workflow.revision
 summary['Run Name']         = custom_runName ?: workflow.runName
 // TODO nf-core: Report custom parameters here
 summary['Reads']            = params.reads
-summary['Fasta Ref']        = params.fasta
-summary['Data Type']        = params.singleEnd ? 'Single-End' : 'Paired-End'
+//summary['Fasta Ref']        = params.fasta
+//summary['Data Type']        = params.singleEnd ? 'Single-End' : 'Paired-End'
 summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if(workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
 summary['Output dir']       = params.outdir
@@ -142,7 +247,6 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
    return yaml_file
 }
 
-
 /* Parse software version numbers */
 
 process get_software_versions {
@@ -168,103 +272,8 @@ process get_software_versions {
 }
 
 
-/* check inputs */
+ /* Output Description HTML */ 
 
-
-process fast5check {
-    tag "$name"
-    echo true
-    
-    input:
-    file filename from inputfast5
-    
-    script:
-    """
-    echo fast5 input file is $filename
-    """
-
-}
-
-
-process fastqcheck {
-    tag "$name"
-    echo true
-
-    input:
-    file filename from inputfastq
-
-    script:
-    """
-    echo fastq input file is $filename
-    """
-}
-
-
-
-/* Basecalling */
-
-// process albacore {
-//     tag "$name"
-//     publishDir "${params.outdir}/fastqc", mode: 'copy',
-//         saveAs: {filename -> filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"}
-
-//     input:
-//     set val(name), file(reads) from read_files_fastqc
-
-//     output:
-//     file "*_fastqc.{zip,html}" into fastqc_results
-
-//     script:
-//     """
-//     fastqc -q $reads
-//     """
-// }
-
-
-// or: Guppy 3
-
-
-/* Get information about the reads */
-
-
-
-
-
-
-
-
-
-
-
-// process multiqc {
-//     publishDir "${params.outdir}/MultiQC", mode: 'copy'
-
-//     input:
-//     file multiqc_config from ch_multiqc_config
-//     // TODO nf-core: Add in log files from your new processes for MultiQC to find!
-//     file ('fastqc/*') from fastqc_results.collect().ifEmpty([])
-//     file ('software_versions/*') from software_versions_yaml.collect()
-//     file workflow_summary from create_workflow_summary(summary)
-
-//     output:
-//     file "*multiqc_report.html" into multiqc_report
-//     file "*_data"
-//     file "multiqc_plots"
-
-//     script:
-//     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
-//     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
-//     // TODO nf-core: Specify which MultiQC modules to use with -m for a faster run time
-//     """
-//     multiqc -f $rtitle $rfilename --config $multiqc_config .
-//     """
-// }
-
-
-
-/*
- * STEP 3 - Output Description HTML
- */
 process output_documentation {
     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
@@ -285,6 +294,8 @@ process output_documentation {
 /*
  * Completion e-mail notification
  */
+
+ 
 workflow.onComplete {
 
     // Set up the e-mail variables
@@ -318,18 +329,18 @@ workflow.onComplete {
 
     // TODO nf-core: If not using MultiQC, strip out this code (including params.maxMultiqcEmailFileSize)
     // On success try attach the multiqc report
-    def mqc_report = null
-    try {
-        if (workflow.success) {
-            mqc_report = multiqc_report.getVal()
-            if (mqc_report.getClass() == ArrayList){
-                log.warn "[nf-core/porepatrol] Found multiple reports from process 'multiqc', will use only one"
-                mqc_report = mqc_report[0]
-            }
-        }
-    } catch (all) {
-        log.warn "[nf-core/porepatrol] Could not attach MultiQC report to summary email"
-    }
+    // def mqc_report = null
+    // try {
+    //     if (workflow.success) {
+    //         mqc_report = multiqc_report.getVal()
+    //         if (mqc_report.getClass() == ArrayList){
+    //             log.warn "[nf-core/porepatrol] Found multiple reports from process 'multiqc', will use only one"
+    //             mqc_report = mqc_report[0]
+    //         }
+    //     }
+    // } catch (all) {
+    //     log.warn "[nf-core/porepatrol] Could not attach MultiQC report to summary email"
+    // }
 
     // Render the TXT template
     def engine = new groovy.text.GStringTemplateEngine()
