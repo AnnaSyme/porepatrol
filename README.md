@@ -11,11 +11,13 @@
 ## Introduction
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
-## How do I use nextflow? 
+## How can I use nextflow 
+
 * Install nextflow
 * Run nextflow: `nextflow run [workflow name]`
 
-## What does porepatrol do?
+## What does porepatrol do
+
 * Input: nanopore reads, in raw fast5 format
 * Runs: basecalling, quality control, trimming adapters, filtering and trimming. 
 * Output: fastq reads. 

@@ -54,18 +54,15 @@ NXF_OPTS='-Xms1g -Xmx4g'
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 
-For raw fast5 files:
+
 ```bash
-nextflow run nf-core/porepatrol --reads 'fast5/*' --fast5
+nextflow run nf-core/porepatrol --reads 'fast5/*' 
 ```
 
-For basecalled fastq files:
-```bash
-nextflow run nf-core/porepatrol --reads '*.FastQ' --basecalled
-```
 
 <!-- This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
  -->
+
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -76,7 +73,7 @@ results         # Finished results (configurable, see below)
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
-### What are the default parameters for the tools in the workflow? How can I change them?
+### What are the default parameters for the tools and how can I change them
 
 #### For nf-core workflows in general
 
