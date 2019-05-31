@@ -17,6 +17,7 @@
 */
 
 /* input reads into channel */
+
 Channel
     .fromPath(params.reads)
     .set { input }
@@ -295,7 +296,7 @@ process output_documentation {
  * Completion e-mail notification
  */
 
- 
+
 workflow.onComplete {
 
     // Set up the e-mail variables
