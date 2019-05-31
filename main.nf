@@ -24,7 +24,7 @@ Channel
 
 /* Basecalling */
 
-process albacore {
+process guppy {
     echo true
     //add save dir here
 
@@ -32,18 +32,14 @@ process albacore {
     file x from input
 
     output:
-    file 'tempfile.txt' into basecalled1
-    file 'tempfile.txt' into basecalled2
-    //file "pass/*.fastq" into basecalled 
-    //anything else to save?
+    
 
     script:
-    //how to run albacore:
-    //read_fast5_basecaller.py -i [input] -t [threads] -s [output path] -c [config file about seq chemistry]
-
+    
     """
-    echo albacore process with file $x
-    echo "temp" > tempfile.txt
+    echo process guppy with thing $x 
+    echo is thing a file or a whole folder
+    guppy_basecaller -i $x -s guppyout -c dna_r9.5_450bps.cfg 
     """
 }
 
