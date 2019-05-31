@@ -30,7 +30,7 @@ LABEL authors="Anna Syme" \
       description="Docker image containing all requirements for nf-core/porepatrol pipeline"
 
 #copy output from first container's data file - the guppy output
-COPY --from=build-env /data
+COPY --from=build-env /data ./
 # then add this next statement as per usual?
 
 COPY environment.yml /
