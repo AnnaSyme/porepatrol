@@ -244,6 +244,10 @@ Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a 
 
 <!-- TODO nf-core: Describe any other command line flags here -->
 
+
+<!-- e.g. extra or diff args to add for nanoplot or nanofilt --> 
+
+
 ### `--outdir`
 The output directory where the results will be saved.
 

@@ -57,9 +57,9 @@ process porechop {
 
     script:
     """
-    porechop -i $x -o chopped.fastq 
-    #${params.porechop_args} 
+    porechop -i $x -o chopped.fastq ${params.porechop_args}
     """
+//${params.porechop_args}
 }
 
 /* TODO - if more than one output file, would need to collect them in channel */
@@ -67,7 +67,7 @@ process porechop {
 /* Assess reads with nanoplot */
 
 process nanoplot1 {
-    publishDir "${params.outdir}/nanoplot", mode: 'copy'
+    publishDir "${params.outdir}/nanoplot1", mode: 'copy'
 
     input:
     file x from chopped1
@@ -77,9 +77,9 @@ process nanoplot1 {
 
     script:
     """
-    nanoplot --fastq $x -o nanoplot1 
-    #${params.nanopore1_args}
+    nanoplot --fastq $x -o nanoplot1
     """
+//${params.nanopore1_args}
 }
 
 
@@ -100,6 +100,9 @@ process nanofilt {
     """
 }
 
+/* TODO: report if this process filtered out all the reads */
+/* Otherwise next step will fail */
+
 /* Assess reads again with nanoplot */
 /* TODO */
 
@@ -115,9 +118,10 @@ process nanoplot2 {
 
     script:
     """
-    nanoplot --fastq $x -o nanoplot2 
-    #${params.nanopore2_args}
+    nanoplot --fastq $x -o nanoplot2
     """
+//${params.nanopore2_args}
+
 }
 
 /*

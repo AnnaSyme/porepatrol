@@ -12,8 +12,9 @@ dependencies:
   - nanoplot=1.24.0
   - porechop=0.2.3_seqan2.1.1
   - nanofilt=2.3.0 
+# for markdown_to_html.r
+  - r-markdown=0.9
 
-   
   
 
 

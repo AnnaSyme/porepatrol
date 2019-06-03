@@ -18,10 +18,10 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 ## What does porepatrol do
 
-* Input: Basecalled nanopore reads in FASTQ format
-* Runs: quality control (nanoplot), trimming adapters (porechop), filtering and trimming (nanofilt). 
-* Basic usage is: nextflow run porepatrol --reads "[path to FASTQ reads]"
-* Output: trimmed, filtered, FASTQ reads in [what folder?] 
+* Input: Basecalled nanopore reads in fastq format
+* Runs: trims adapters (porechop), assess read quality (nanoplot), filter out low-quality reads (nanofilt), repeat read assessment. 
+* Basic usage is: nextflow run porepatrol --reads "[path to fastq reads]"
+* Output: trimmed, filtered, fastq reads. 
 * Note: porepatrol aims to add basecalling functionality if the software becomes available (e.g. Guppy). 
 
 ## Documentation

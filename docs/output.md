@@ -15,8 +15,12 @@ and processes data using the following steps:
 * [Nanofilt](#nanofilt) - filter reads according to quality and/or length
 
 ## Porechop
+[Porechop](https://github.com/rrwick/Porechop) can chop adapters from nanopore reads. It can also split a read if there is an adapter in the middle. Porechop contains a file with a list of known nanopore adapters. This tool is no longer supported but there are no suitable replacements yet. 
 
+**Output directory: `results/porechop`**
 
+* `chopped.fastq`
+  * Fastq reads that have had their adpaters removed. 
 
 
 ## Nanoplot
@@ -32,6 +36,12 @@ and processes data using the following steps:
   * average read quality vs read length
 
 ## Nanofilt
+
+
+
+
+
+
 
 <!-- TODO -->
 
