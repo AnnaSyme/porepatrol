@@ -20,8 +20,6 @@
 
 Channel
     .fromPath(params.reads)
-    //.collect() 
-    //.println()
     .set { input }
 
 
@@ -30,38 +28,34 @@ Channel
 /* Collect multiple input files */
 
 process concatfastqs {
-    echo true
-
     input:
-    file x from input
+    file x from input.collect()  //need to collect all files from input
 
     output:
     file "inputs.fastq" into concatfastqs1
     file "inputs.fastq" into concatfastqs2
 
     script:
+    //TODO: does this ever make a file that's too large?
+    //should it be gzipped?
+
     """
     cat $x > inputs.fastq
     """
-
 }
 
 /* Assess reads with nanoplot */
 
 process nanoplot {
-    echo true
+    publishDir "${params.outdir}/nanoplot", mode: 'copy'
 
     input:
     file x from concatfastqs1
-    //should just be one file
 
     output:
     file "nanoplot/*" 
-    //not into channel, just keep for reports
 
     script:
-    // nanoplot --fastq file.fastq
-
     """
     nanoplot --fastq $x -o nanoplot
     """
@@ -72,7 +66,7 @@ process nanoplot {
 /* Chop adapters */
 
 process porechop {
-    echo true
+    publishDir "${params.outdir}/porechop", mode: 'copy'
 
     input:
     file x from concatfastqs2
@@ -81,7 +75,6 @@ process porechop {
     file 'chopped.fastq' into chopped
 
     script:
-
     """
     porechop -i $x -o chopped.fastq
     """
@@ -92,7 +85,7 @@ process porechop {
 /*  Filter poor quality and short reads */
 
 process nanofilt {
-    echo true
+    publishDir "${params.outdir}/nanofilt", mode: 'copy'
 
     input: 
     file x from chopped
@@ -102,30 +95,28 @@ process nanofilt {
 
     script:
     """
-    NanoFilt -q 10 -l 500 < chopped.fastq > filtered.fastq
+    NanoFilt -q 8 -l 3000 < $x > filtered.fastq
     """
 }
 
 /* Assess reads again with nanoplot */
-/* TODO 8?
+/* TODO */
 
-// process nanoplot2 {
-//     echo true
 
-//     input:
-//     file x from filtered
+process nanoplot2 {
+    publishDir "${params.outdir}/nanoplot2", mode: 'copy'
 
-//     output:
-//     //not into channel? just keep for info
+    input:
+    file x from filtered
 
-//     script:
-//     // nanoplot --fastq file.fastq
+    output:
+    file "nanoplot2/*" 
 
-//     """
-//     echo nanoplot2 process with file $x
-//     echo "temp5" > tempfile5.txt
-//     """
-// }
+    script:
+    """
+    nanoplot --fastq $x -o nanoplot2
+    """
+}
 
 /*
 ========================================================================================
@@ -276,20 +267,20 @@ process get_software_versions {
  /* Output Description HTML */ 
 /* TODO - is commented out for now */
 
-// process output_documentation {
-//     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
+process output_documentation {
+    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
-//     input:
-//     file output_docs from ch_output_docs
+    input:
+    file output_docs from ch_output_docs
 
-//     output:
-//     file "results_description.html"
+    output:
+    file "results_description.html"
 
-//     script:
-//     """
-//     markdown_to_html.r $output_docs results_description.html
-//     """
-// }
+    script:
+    """
+    markdown_to_html.r $output_docs results_description.html
+    """
+}
 
 
 
