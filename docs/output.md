@@ -10,13 +10,26 @@ This document describes the output produced by the pipeline.
 The pipeline is built using [Nextflow](https://www.nextflow.io/)
 and processes data using the following steps:
 
-* [Nanoplot](#nanoplot) - assess quality of reads
 * [Porechop](#porechop) - remove adapters from reads
+* [Nanoplot](#nanoplot) - assess quality of reads
 * [Nanofilt](#nanofilt) - filter reads according to quality and/or length
 
-## Nanoplot
-
 ## Porechop
+
+
+
+
+## Nanoplot
+[Nanoplot](https://github.com/wdecoster/NanoPlot) provides information about your fastq reads. This is run after adapter trimming, and after read filtering. You can then compare the results from both analyses. 
+
+**Output directory: `results/nanoplot1 or nanoplot1`**
+
+* `NanoStats.txt`
+  * Statistics for the fastq reads: including mean read length and quality, number of reads, total number of bases, etc. 
+* `HistogramReadlength`
+  * number of reads vs read length
+* `LengthvsQualityScatterPlot_dot.png`
+  * average read quality vs read length
 
 ## Nanofilt
 

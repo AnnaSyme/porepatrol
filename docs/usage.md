@@ -61,6 +61,8 @@ nextflow run nf-core/porepatrol --reads 'data/*.fastq' -profile docker
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
+The pipeline will run porechop, nanoplot, nanofilt, and a second round of nanoplot. 
+
 Note that the pipeline will create the following files in your working directory:
 
 ```bash

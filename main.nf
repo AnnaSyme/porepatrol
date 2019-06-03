@@ -32,8 +32,7 @@ process concatfastqs {
     file x from input.collect()  //need to collect all files from input
 
     output:
-    file "inputs.fastq" into concatfastqs1
-    file "inputs.fastq" into concatfastqs2
+    file "inputs.fastq" into concatfastqs // for porechop
 
     script:
     //TODO: does this ever make a file that's too large?
@@ -44,43 +43,43 @@ process concatfastqs {
     """
 }
 
-/* Assess reads with nanoplot */
-
-process nanoplot {
-    publishDir "${params.outdir}/nanoplot", mode: 'copy'
-
-    input:
-    file x from concatfastqs1
-
-    output:
-    file "nanoplot/*" 
-
-    script:
-    """
-    nanoplot --fastq $x -o nanoplot
-    """
-}
-
-/* TODO: if quality bad, report and stop */
-
 /* Chop adapters */
 
 process porechop {
     publishDir "${params.outdir}/porechop", mode: 'copy'
 
     input:
-    file x from concatfastqs2
+    file x from concatfastqs
     
     output:
-    file 'chopped.fastq' into chopped
+    file 'chopped.fastq' into chopped1 //for nanoplot
+    file 'chopped.fastq' into chopped2 //for nanofilt
 
     script:
     """
-    porechop -i $x -o chopped.fastq
+    porechop -i $x -o chopped.fastq ${params.porechop_args}
     """
 }
 
 /* TODO - if more than one output file, would need to collect them in channel */
+
+/* Assess reads with nanoplot */
+
+process nanoplot1 {
+    publishDir "${params.outdir}/nanoplot", mode: 'copy'
+
+    input:
+    file x from chopped1
+
+    output:
+    file "nanoplot1/*" 
+
+    script:
+    """
+    nanoplot --fastq $x -o nanoplot1 ${params.nanopore1_args}
+    """
+}
+
 
 /*  Filter poor quality and short reads */
 
@@ -88,14 +87,14 @@ process nanofilt {
     publishDir "${params.outdir}/nanofilt", mode: 'copy'
 
     input: 
-    file x from chopped
+    file x from chopped2
 
     output:
     file 'filtered.fastq' into filtered
 
     script:
     """
-    NanoFilt -q 8 -l 3000 < $x > filtered.fastq
+    NanoFilt ${params.nanofilt_args} < $x > filtered.fastq
     """
 }
 
@@ -114,7 +113,7 @@ process nanoplot2 {
 
     script:
     """
-    nanoplot --fastq $x -o nanoplot2
+    nanoplot --fastq $x -o nanoplot2 ${params.nanopore2_args}
     """
 }
 
