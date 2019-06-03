@@ -1,6 +1,8 @@
 # nf-core/porepatrol: Output
 
-This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
+This document describes the output produced by the pipeline. 
+
+<!-- Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline. -->
 
 <!-- TODO nf-core: Write this documentation describing your workflow's output -->
 
@@ -8,9 +10,21 @@ This document describes the output produced by the pipeline. Most of the plots a
 The pipeline is built using [Nextflow](https://www.nextflow.io/)
 and processes data using the following steps:
 
-* [FastQC](#fastqc) - read quality control
-* [MultiQC](#multiqc) - aggregate report, describing results of the whole pipeline
+* [Nanoplot](#nanoplot) - assess quality of reads
+* [Porechop](#porechop) - remove adapters from reads
+* [Nanofilt](#nanofilt) - filter reads according to quality and/or length
 
+## Nanoplot
+
+## Porechop
+
+## Nanofilt
+
+<!-- TODO -->
+
+
+
+<!--
 ## FastQC
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your reads. It provides information about the quality score distribution across your reads, the per base sequence content (%T/A/G/C). You get information about adapter contamination and other overrepresented sequences.
 
@@ -39,3 +53,4 @@ The pipeline has special steps which allow the software versions used to be repo
   * Directory containing parsed statistics from the different tools used in the pipeline
 
 For more information about how to use MultiQC reports, see [http://multiqc.info](http://multiqc.info)
+-->

@@ -141,14 +141,14 @@ If `-profile` is not specified at all the pipeline will be run locally and expec
 Use this to specify the location of your input FastQ files. For example:
 
 ```bash
---reads 'path/to/data/sample_*_{1,2}.fastq'
+--reads 'path/to/data/*.fastq'
 ```
 
 Please note the following requirements:
 
 1. The path must be enclosed in quotes
 2. The path must have at least one `*` wildcard character
-3. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs.
+<!-- 3. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs. 
 
 If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
 
@@ -161,6 +161,9 @@ By default, the pipeline expects paired-end data. If you have single-end data, y
 
 It is not possible to run a mixture of single-end and paired-end files in one run.
 
+-->
+
+<!--
 
 ## Reference genomes
 
@@ -185,8 +188,7 @@ You can find the keys to specify the genomes in the [iGenomes config file](../co
 Note that you can use the same configuration setup to save sets of reference files for your own use, even if they are not part of the iGenomes resource. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.
 
 The syntax for this reference configuration is as follows:
-
-<!-- TODO nf-core: Update reference genome example according to what is needed -->
+TODO nf-core: Update reference genome example according to what is needed
 
 ```nextflow
 params {
@@ -198,8 +200,12 @@ params {
   }
 }
 ```
+-->
+
 
 <!-- TODO nf-core: Describe reference path flags -->
+
+<!--
 ### `--fasta`
 If you prefer, you can specify the full path to your reference genome when you run the pipeline:
 
@@ -209,6 +215,8 @@ If you prefer, you can specify the full path to your reference genome when you r
 
 ### `--igenomesIgnore`
 Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`.
+-->
+
 
 ## Job resources
 ### Automatic resubmission
@@ -243,7 +251,7 @@ Set this parameter to your e-mail address to get a summary e-mail with details o
 ### `-name`
 Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
 
-This is used in the MultiQC report (if not default) and in the summary HTML / e-mail (always).
+This is used in <!-- the MultiQC report (if not default) and in--> the summary HTML / e-mail (always).
 
 **NB:** Single hyphen (core Nextflow option)
 
@@ -306,6 +314,7 @@ Set to receive plain-text e-mails instead of HTML formatted.
 
 ### `--monochrome_logs`
 Set to disable colourful command line output and live life in monochrome.
-
+<!--
 ### `--multiqc_config`
-Specify a path to a custom MultiQC configuration file.
+Specify a path to a custom MultiQC configuration file. -->
+
