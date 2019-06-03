@@ -7,5 +7,14 @@ channels:
   - defaults
 dependencies:
   # TODO nf-core: Add required software dependencies here
-  - fastqc=0.11.8
-  - multiqc=1.7
+#  - fastqc=0.11.8
+#  - multiqc=1.7
+  - nanoplot=1.24.0
+  - porechop=0.2.3_seqan2.1.1
+  - nanofilt=2.3.0 
+
+   
+  
+
+
+

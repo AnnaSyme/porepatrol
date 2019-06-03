@@ -1,6 +1,6 @@
 # nf-core/porepatrol
 
-**Basecall, trim, filter and assess nanopore reads**.
+**Trim, filter and assess nanopore reads**.
 
 [![Build Status](https://travis-ci.com/nf-core/porepatrol.svg?branch=master)](https://travis-ci.com/nf-core/porepatrol)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A50.32.0-brightgreen.svg)](https://www.nextflow.io/)
@@ -18,10 +18,11 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 
 ## What does porepatrol do
 
-* Input: nanopore reads, in raw fast5 format
-* Runs: basecalling, quality control, trimming adapters, filtering and trimming. 
-* Basic usage is: nextflow run porepatrol --reads "fast5s/\*"
-* Output: basecalled, trimmed, filtered, fastq reads in [what folder?] 
+* Input: Basecalled nanopore reads in FASTQ format
+* Runs: quality control (nanoplot), trimming adapters (porechop), filtering and trimming (nanofilt). 
+* Basic usage is: nextflow run porepatrol --reads "[path to FASTQ reads]"
+* Output: trimmed, filtered, FASTQ reads in [what folder?] 
+* Note: porepatrol aims to add basecalling functionality if the software becomes available (e.g. Guppy). 
 
 ## Documentation
 The nf-core/porepatrol pipeline comes with documentation about the pipeline, found in the `docs/` directory:
