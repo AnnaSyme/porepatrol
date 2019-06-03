@@ -7,14 +7,16 @@ import re
 regexes = {
     'nf-core/porepatrol': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
-    'FastQC': ['v_fastqc.txt', r"FastQC v(\S+)"],
-    'MultiQC': ['v_multiqc.txt', r"multiqc, version (\S+)"],
+    'Nanoplot': ['v_nanoplot.txt', r"(\S+)"],
+    'Porechop': ['v_porechop.txt', r"0.2.3_seqan2.1.1 (\S/+)"],
+    'Nanofilt': ['v_porechop.txt', r"(\S/+)"],
 }
 results = OrderedDict()
 results['nf-core/porepatrol'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
-results['FastQC'] = '<span style="color:#999999;\">N/A</span>'
-results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
+results['Nanoplot'] = '<span style="color:#999999;\">N/A</span>'
+results['Porechop'] = '<span style="color:#999999;\">N/A</span>'
+results['Nanofilt'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
 for k, v in regexes.items():

@@ -20,8 +20,8 @@
 
 Channel
     .fromPath(params.reads)
-    .collect() 
-    .println()
+    //.collect() 
+    //.println()
     .set { input }
 
 
@@ -52,7 +52,7 @@ process nanoplot {
     echo true
 
     input:
-    file x from concatfastqs
+    file x from concatfastqs1
     //should just be one file
 
     output:
@@ -78,12 +78,12 @@ process porechop {
     file x from concatfastqs2
     
     output:
-    file 'porechop/*' into chopped
+    file 'chopped.fastq' into chopped
 
     script:
 
     """
-    porcehop -i $x -o porechop
+    porechop -i $x -o chopped.fastq
     """
 }
 
@@ -244,6 +244,10 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 }
 
 /* Parse software version numbers */
+/* Note: see workflow/bin/ for the scrape_software_versions.py script */
+/* In this script: add in tools here [defaults are FastQC, MultiQC etc] */
+
+
 
 process get_software_versions {
     publishDir "${params.outdir}/pipeline_info", mode: 'copy',
@@ -254,36 +258,38 @@ process get_software_versions {
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
-    file "software_versions.csv"
+    file "software_versions.csv" 
 
     script:
     // TODO nf-core: Get all tools to print their version number here
     """
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
-    fastqc --version > v_fastqc.txt
-    multiqc --version > v_multiqc.txt
+    nanoplot --version > v_nanoplot.txt
+    porechop --version > v_porechop.txt
+    nanofilt --version > v_nanofilt.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
 
 
  /* Output Description HTML */ 
+/* TODO - is commented out for now */
 
-process output_documentation {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
+// process output_documentation {
+//     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
-    input:
-    file output_docs from ch_output_docs
+//     input:
+//     file output_docs from ch_output_docs
 
-    output:
-    file "results_description.html"
+//     output:
+//     file "results_description.html"
 
-    script:
-    """
-    markdown_to_html.r $output_docs results_description.html
-    """
-}
+//     script:
+//     """
+//     markdown_to_html.r $output_docs results_description.html
+//     """
+// }
 
 
 
