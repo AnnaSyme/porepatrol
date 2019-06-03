@@ -57,7 +57,8 @@ process porechop {
 
     script:
     """
-    porechop -i $x -o chopped.fastq ${params.porechop_args}
+    porechop -i $x -o chopped.fastq 
+    #${params.porechop_args} 
     """
 }
 
@@ -76,7 +77,8 @@ process nanoplot1 {
 
     script:
     """
-    nanoplot --fastq $x -o nanoplot1 ${params.nanopore1_args}
+    nanoplot --fastq $x -o nanoplot1 
+    #${params.nanopore1_args}
     """
 }
 
@@ -113,7 +115,8 @@ process nanoplot2 {
 
     script:
     """
-    nanoplot --fastq $x -o nanoplot2 ${params.nanopore2_args}
+    nanoplot --fastq $x -o nanoplot2 
+    #${params.nanopore2_args}
     """
 }
 
