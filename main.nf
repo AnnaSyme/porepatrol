@@ -16,31 +16,34 @@
 ========================================================================================
 */
 
-/* input reads into channel */
+/* input FASTQ reads into channel */
 
 Channel
     .fromPath(params.reads)
+    .collect() 
+    .println()
     .set { input }
 
-/* Basecalling */
 
-process guppy {
+/* TODO check inputs have fastq extension */
+
+/* Collect multiple input files */
+
+process concatfastqs {
     echo true
-    //add save dir here
 
     input:
     file x from input
 
     output:
-    
+    file "inputs.fastq" into concatfastqs1
+    file "inputs.fastq" into concatfastqs2
 
     script:
-    
     """
-    echo process guppy with thing $x 
-    echo is thing a file or a whole folder
-    guppy_basecaller -i $x -s guppyout -c dna_r9.5_450bps.cfg 
+    cat $x > inputs.fastq
     """
+
 }
 
 /* Assess reads with nanoplot */
@@ -49,20 +52,22 @@ process nanoplot {
     echo true
 
     input:
-    file x from basecalled1
+    file x from concatfastqs
+    //should just be one file
 
     output:
-    //not into channel? just keep for info
+    file "nanoplot/*" 
+    //not into channel, just keep for reports
 
     script:
     // nanoplot --fastq file.fastq
 
     """
-    echo nanoplot process with file $x
-    echo "temp2" > tempfile2.txt
+    nanoplot --fastq $x -o nanoplot
     """
 }
 
+/* TODO: if quality bad, report and stop */
 
 /* Chop adapters */
 
@@ -70,22 +75,19 @@ process porechop {
     echo true
 
     input:
-    file x from basecalled2
+    file x from concatfastqs2
     
     output:
-    file 'tempfile3.txt' into chopped
-    //file.fastq 
+    file 'porechop/*' into chopped
 
     script:
-    //how to run porechop:
-    //porcehop -i [fastq] -o [outdir]
 
     """
-    echo porechop process with file $x
-    echo "temp3" > tempfile3.txt
+    porcehop -i $x -o porechop
     """
 }
 
+/* TODO - if more than one output file, would need to collect them in channel */
 
 /*  Filter poor quality and short reads */
 
@@ -96,37 +98,34 @@ process nanofilt {
     file x from chopped
 
     output:
-    file 'tempfile4.txt' into filtered
-    //filtered.fastq
+    file 'filtered.fastq' into filtered
 
     script:
-    // NanoFilt -q 10 -l 500 < chopped.fastq > filtered.fastq
-
     """
-    echo nanofilt process with file $x
-    echo "temp4" > tempfile4.txt
+    NanoFilt -q 10 -l 500 < chopped.fastq > filtered.fastq
     """
 }
 
 /* Assess reads again with nanoplot */
+/* TODO 8?
 
-process nanoplot2 {
-    echo true
+// process nanoplot2 {
+//     echo true
 
-    input:
-    file x from filtered
+//     input:
+//     file x from filtered
 
-    output:
-    //not into channel? just keep for info
+//     output:
+//     //not into channel? just keep for info
 
-    script:
-    // nanoplot --fastq file.fastq
+//     script:
+//     // nanoplot --fastq file.fastq
 
-    """
-    echo nanoplot2 process with file $x
-    echo "temp5" > tempfile5.txt
-    """
-}
+//     """
+//     echo nanoplot2 process with file $x
+//     echo "temp5" > tempfile5.txt
+//     """
+// }
 
 /*
 ========================================================================================
@@ -147,7 +146,7 @@ def helpMessage() {
     e.g. 
 
     Mandatory arguments:
-      --reads                       Path to input fast5 data (must be surrounded with quotes)
+      --reads                       Path to input fastq data (must be surrounded with quotes)
 
 
     Options:
