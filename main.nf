@@ -77,7 +77,7 @@ process nanoplot1 {
 
     script:
     """
-    nanoplot --fastq $x -o nanoplot1
+    NanoPlot --fastq $x -o nanoplot1
     """
 //${params.nanopore1_args}
 }
@@ -118,7 +118,7 @@ process nanoplot2 {
 
     script:
     """
-    nanoplot --fastq $x -o nanoplot2
+    NanoPlot --fastq $x -o nanoplot2
     """
 //${params.nanopore2_args}
 
@@ -262,9 +262,9 @@ process get_software_versions {
     """
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
-    nanoplot --version > v_nanoplot.txt
+    NanoPlot --version > v_nanoplot.txt
     porechop --version > v_porechop.txt
-    nanofilt --version > v_nanofilt.txt
+    NanoFilt --version > v_nanofilt.txt
 
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
@@ -273,21 +273,23 @@ process get_software_versions {
 
  /* Output Description HTML */ 
 /* TODO - is commented out for now */
+/* where does the doc in that input channel come from? */
+/* or does channel only get created if it exists? */
 
-process output_documentation {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
+// process output_documentation {
+//     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
-    input:
-    file output_docs from ch_output_docs
+//     input:
+//     file output_docs from ch_output_docs
 
-    output:
-    file "results_description.html"
+//     output:
+//     file "results_description.html"
 
-    script:
-    """
-    markdown_to_html.r $output_docs results_description.html
-    """
-}
+//     script:
+//     """
+//     markdown_to_html.r $output_docs results_description.html
+//     """
+// }
 
 
 
