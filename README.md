@@ -11,15 +11,12 @@
 ## Introduction
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
-## How can I use nextflow 
-
-* Install nextflow
-* Run nextflow: `nextflow run [workflow name]`
-
 ## What does porepatrol do
 
+Porepatrol is a workflow that processes nanopore reads, to get them ready for analysis. 
+
 * Input: Basecalled nanopore reads in fastq format
-* Runs: trims adapters (porechop), assess read quality (nanoplot), filter out low-quality reads (nanofilt), repeat read assessment. 
+* Steps in the workflow: trim adapters (porechop), assess read quality (nanoplot), filter out low-quality reads (nanofilt).
 * Basic usage is: nextflow run porepatrol --reads "[path to fastq reads]"
 * Output: trimmed, filtered, fastq reads. 
 * Note: porepatrol aims to add basecalling functionality if the software becomes available (e.g. Guppy). 

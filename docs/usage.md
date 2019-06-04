@@ -49,11 +49,8 @@ It is recommended to limit the Nextflow Java virtual machines memory. We recomme
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
 
-<!-- TODO nf-core: Document required command line parameters to run the pipeline-->
-
 ## Running the pipeline
-The typical command for running the pipeline is as follows:
-
+The typical command for running the pipeline is:
 
 ```bash
 nextflow run nf-core/porepatrol --reads 'data/*.fastq' -profile docker 
@@ -72,34 +69,6 @@ results         # Finished results (configurable, see below)
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
-### What are the default parameters for the tools and how can I change them
-
-#### For nf-core workflows in general
-
-Each of the tools in a workflow runs as per its specification in the `main.nf file`. For example, for the (fictional!) tool called amazingtool, look in main.nf, in a process, in the script block:
-
-`amazingtool --some-default-setting 25 ${params.amazingtool_args}`
-
-What are the params.amazingtool_args? Look in the nextflow.config file, in the first section that defines all the parameters:
-
-```bash
-params {
-other-parameter = false
-amazingtool_args = ""
-}
-```
-
-We can see that the default additional arguments here for amazingtool are blank. To change or add in arguments, you can specify them when you run the tool:
-
-```bash
-nextflow run workflow --reads 'path/*' --amazingtool_args "--saveoutput"
-```
-
-#### For this workflow
-
-See the last section of this document, called "other command line parameters".
-
-
 ### Updating the pipeline
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
@@ -114,9 +83,7 @@ First, go to the [nf-core/porepatrol releases page](https://github.com/nf-core/p
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
 
-
 ## Main arguments
-
 ### `-profile`
 Use this parameter to choose a configuration profile. Profiles can give configuration presets for different compute environments. Note that multiple profiles can be loaded, for example: `-profile docker` - the order of arguments is important!
 
@@ -137,10 +104,8 @@ If `-profile` is not specified at all the pipeline will be run locally and expec
   * A profile with a complete configuration for automated testing
   * Includes links to test data so needs no other parameters
 
-<!-- TODO nf-core: Document required command line parameters -->
-
 ### `--reads`
-Use this to specify the location of your input FastQ files. For example:
+Use this to specify the location of your input fastq files. For example:
 
 ```bash
 --reads 'path/to/data/*.fastq'
@@ -150,75 +115,6 @@ Please note the following requirements:
 
 1. The path must be enclosed in quotes
 2. The path must have at least one `*` wildcard character
-<!-- 3. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs. 
-
-If left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`
-
-### `--singleEnd`
-By default, the pipeline expects paired-end data. If you have single-end data, you need to specify `--singleEnd` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--reads`. For example:
-
-```bash
---singleEnd --reads '*.fastq'
-```
-
-It is not possible to run a mixture of single-end and paired-end files in one run.
-
--->
-
-<!--
-
-## Reference genomes
-
-The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
-
-### `--genome` (using iGenomes)
-There are 31 different species supported in the iGenomes references. To run the pipeline, you must specify which to use with the `--genome` flag.
-
-You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:
-
-* Human
-  * `--genome GRCh37`
-* Mouse
-  * `--genome GRCm38`
-* _Drosophila_
-  * `--genome BDGP6`
-* _S. cerevisiae_
-  * `--genome 'R64-1-1'`
-
-> There are numerous others - check the config file for more.
-
-Note that you can use the same configuration setup to save sets of reference files for your own use, even if they are not part of the iGenomes resource. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.
-
-The syntax for this reference configuration is as follows:
-TODO nf-core: Update reference genome example according to what is needed
-
-```nextflow
-params {
-  genomes {
-    'GRCh37' {
-      fasta   = '<path to the genome fasta file>' // Used if no star index given
-    }
-    // Any number of additional genomes, key is used with --genome
-  }
-}
-```
--->
-
-
-<!-- TODO nf-core: Describe reference path flags -->
-
-<!--
-### `--fasta`
-If you prefer, you can specify the full path to your reference genome when you run the pipeline:
-
-```bash
---fasta '[path to Fasta reference]'
-```
-
-### `--igenomesIgnore`
-Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`.
--->
-
 
 ## Job resources
 ### Automatic resubmission
@@ -242,11 +138,11 @@ Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a 
 
 ## Other command line parameters
 
-<!-- TODO nf-core: Describe any other command line flags here -->
+### `--porechop_args`
+Any additional commands for porechop. Input and output files have already been specified.
 
-
-<!-- e.g. extra or diff args to add for nanoplot or nanofilt --> 
-
+### `--nanofilt_args`
+Default is `-q 8`, meaning minimum quality of 8. This can be changed, and other options added. Note that if you are used reads that have been basecalled by albacore, it is recommended to use the additional `--summary` argument and supply the `sequencing_summary.txt` file from the albacore output. 
 
 ### `--outdir`
 The output directory where the results will be saved.
@@ -257,7 +153,7 @@ Set this parameter to your e-mail address to get a summary e-mail with details o
 ### `-name`
 Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
 
-This is used in <!-- the MultiQC report (if not default) and in--> the summary HTML / e-mail (always).
+This is used in the summary HTML / e-mail (always).
 
 **NB:** Single hyphen (core Nextflow option)
 
@@ -320,7 +216,3 @@ Set to receive plain-text e-mails instead of HTML formatted.
 
 ### `--monochrome_logs`
 Set to disable colourful command line output and live life in monochrome.
-<!--
-### `--multiqc_config`
-Specify a path to a custom MultiQC configuration file. -->
-

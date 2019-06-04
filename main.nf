@@ -16,14 +16,11 @@
 ========================================================================================
 */
 
-/* input FASTQ reads into channel */
+/* input fastq reads into channel */
 
 Channel
     .fromPath(params.reads)
-    .set { input }
-
-
-/* TODO check inputs have fastq extension */
+    .set { input } //enhancement: check that these are fastq files
 
 /* Collect multiple input files */
 
@@ -35,9 +32,8 @@ process concatfastqs {
     file "inputs.fastq" into concatfastqs // for porechop
 
     script:
-    //TODO: does this ever make a file that's too large?
-    //should it be gzipped?
-
+    //enhancement: check if this ever makes a file that is very large
+    //and should be gzipped
     """
     cat $x > inputs.fastq
     """
@@ -57,12 +53,11 @@ process porechop {
 
     script:
     """
-    porechop -i $x -o chopped.fastq ${params.porechop_args}
+    porechop -i $x -o chopped.fastq 
     """
-//${params.porechop_args}
 }
 
-/* TODO - if more than one output file, would need to collect them in channel */
+/* If more than one output file, would need to collect them in channel */
 
 /* Assess reads with nanoplot */
 
@@ -79,9 +74,7 @@ process nanoplot1 {
     """
     NanoPlot --fastq $x -o nanoplot1
     """
-//${params.nanopore1_args}
 }
-
 
 /*  Filter poor quality and short reads */
 
@@ -98,14 +91,11 @@ process nanofilt {
     """
     NanoFilt ${params.nanofilt_args} < $x > filtered.fastq
     """
+    //enhancement: report if this process was too strict
+    //and all reads were filtered out
 }
 
-/* TODO: report if this process filtered out all the reads */
-/* Otherwise next step will fail */
-
 /* Assess reads again with nanoplot */
-/* TODO */
-
 
 process nanoplot2 {
     publishDir "${params.outdir}/nanoplot2", mode: 'copy'
@@ -120,8 +110,6 @@ process nanoplot2 {
     """
     NanoPlot --fastq $x -o nanoplot2
     """
-//${params.nanopore2_args}
-
 }
 
 /*
@@ -132,22 +120,20 @@ process nanoplot2 {
 
 
 def helpMessage() {
-    // TODO nf-core: Add to this help message with new command line parameters
     log.info nfcoreHeader()
     log.info"""
 
     Usage: 
 
-    nextflow run nf-core/porepatrol --reads [path to files] 
-
-    e.g. 
+    nextflow run nf-core/porepatrol --reads "path to fastq files"
 
     Mandatory arguments:
       --reads                       Path to input fastq data (must be surrounded with quotes)
 
-
     Options:
       -profile                      Configuration profile to use. Can use multiple (comma separated)
+      --porechop_args               Additional arguments for porechop
+      --nanofilt_args               Changed or extra arguments for nanofilt
       --outdir                      The output directory where the results will be saved
       --email                       Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits
       -name                         Name for the pipeline run. If not specified, Nextflow will automatically generate a random mnemonic.
@@ -215,7 +201,7 @@ if(params.config_profile_contact)     summary['Config Contact']     = params.con
 if(params.config_profile_url)         summary['Config URL']         = params.config_profile_url
 if(params.email) {
   summary['E-mail Address']  = params.email
-  summary['MultiQC maxsize'] = params.maxMultiqcEmailFileSize
+
 }
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
 log.info "\033[2m----------------------------------------------------\033[0m"
@@ -241,10 +227,6 @@ ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style
 }
 
 /* Parse software version numbers */
-/* Note: see workflow/bin/ for the scrape_software_versions.py script */
-/* In this script: add in tools here [defaults are FastQC, MultiQC etc] */
-
-
 
 process get_software_versions {
     publishDir "${params.outdir}/pipeline_info", mode: 'copy',
@@ -258,7 +240,6 @@ process get_software_versions {
     file "software_versions.csv" 
 
     script:
-    // TODO nf-core: Get all tools to print their version number here
     """
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
@@ -270,32 +251,26 @@ process get_software_versions {
 }
 
 
- /* Output Description HTML */ 
-/* TODO - is commented out for now */
-/* where does the doc in that input channel come from? */
-/* or does channel only get created if it exists? */
+/* Output Description HTML */ 
 
-// process output_documentation {
-//     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
+process output_documentation {
+    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
-//     input:
-//     file output_docs from ch_output_docs
+    input:
+    file output_docs from ch_output_docs
 
-//     output:
-//     file "results_description.html"
+    output:
+    file "results_description.html"
 
-//     script:
-//     """
-//     markdown_to_html.r $output_docs results_description.html
-//     """
-// }
-
-
+    script:
+    """
+    markdown_to_html.r $output_docs results_description.html
+    """
+}
 
 /*
  * Completion e-mail notification
  */
-
 
 workflow.onComplete {
 
@@ -328,21 +303,6 @@ workflow.onComplete {
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
 
-    // TODO nf-core: If not using MultiQC, strip out this code (including params.maxMultiqcEmailFileSize)
-    // On success try attach the multiqc report
-    // def mqc_report = null
-    // try {
-    //     if (workflow.success) {
-    //         mqc_report = multiqc_report.getVal()
-    //         if (mqc_report.getClass() == ArrayList){
-    //             log.warn "[nf-core/porepatrol] Found multiple reports from process 'multiqc', will use only one"
-    //             mqc_report = mqc_report[0]
-    //         }
-    //     }
-    // } catch (all) {
-    //     log.warn "[nf-core/porepatrol] Could not attach MultiQC report to summary email"
-    // }
-
     // Render the TXT template
     def engine = new groovy.text.GStringTemplateEngine()
     def tf = new File("$baseDir/assets/email_template.txt")
@@ -355,7 +315,7 @@ workflow.onComplete {
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.maxMultiqcEmailFileSize.toBytes() ]
+    def smail_fields = [ email: params.email, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report]
     def sf = new File("$baseDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
