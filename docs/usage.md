@@ -12,11 +12,6 @@
 * [Main arguments](#main-arguments)
   * [`-profile`](#-profile)
   * [`--reads`](#--reads)
-  * [`--singleEnd`](#--singleend)
-* [Reference genomes](#reference-genomes)
-  * [`--genome` (using iGenomes)](#--genome-using-igenomes)
-  * [`--fasta`](#--fasta)
-  * [`--igenomesIgnore`](#--igenomesignore)
 * [Job resources](#job-resources)
   * [Automatic resubmission](#automatic-resubmission)
   * [Custom resource requests](#custom-resource-requests)
@@ -24,6 +19,8 @@
   * [`--awsqueue`](#--awsqueue)
   * [`--awsregion`](#--awsregion)
 * [Other command line parameters](#other-command-line-parameters)
+  * [`--porechop_args`](#--porechop_args)
+  * [`--nanofilt_args`](#--nanofilt_args)
   * [`--outdir`](#--outdir)
   * [`--email`](#--email)
   * [`-name`](#-name)
@@ -36,7 +33,6 @@
   * [`--max_cpus`](#--max_cpus)
   * [`--plaintext_email`](#--plaintext_email)
   * [`--monochrome_logs`](#--monochrome_logs)
-  * [`--multiqc_config`](#--multiqc_config)
 <!-- TOC END -->
 
 
@@ -53,12 +49,12 @@ NXF_OPTS='-Xms1g -Xmx4g'
 The typical command for running the pipeline is:
 
 ```bash
-nextflow run nf-core/porepatrol --reads 'data/*.fastq' -profile docker 
+nextflow run nf-core/porepatrol --reads 'data/*.fastq' -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
 
-The pipeline will run porechop, nanoplot, nanofilt, and a second round of nanoplot. 
+The pipeline will run porechop, nanoplot, nanofilt, and a second round of nanoplot.
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -142,7 +138,7 @@ Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a 
 Any additional commands for porechop. Input and output files have already been specified.
 
 ### `--nanofilt_args`
-Default is `-q 8`, meaning minimum quality of 8. This can be changed, and other options added. Note that if you are used reads that have been basecalled by albacore, it is recommended to use the additional `--summary` argument and supply the `sequencing_summary.txt` file from the albacore output. 
+Default is `-q 8`, meaning minimum quality of 8. This can be changed, and other options added; e.g. for minimum length 500: `-q 8 -l 500`. Note that if you are used reads that have been basecalled by albacore, it is recommended to use the additional `--summary` argument and supply the `sequencing_summary.txt` file from the albacore output.
 
 ### `--outdir`
 The output directory where the results will be saved.
