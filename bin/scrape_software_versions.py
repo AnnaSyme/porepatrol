@@ -7,10 +7,11 @@ import re
 regexes = {
     'nf-core/porepatrol': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
-    'Nanoplot': ['v_nanoplot.txt', r"(\S+)"],
-    'Porechop': ['v_porechop.txt', r"0.2.3_seqan2.1.1 (\S/+)"],
-    'Nanofilt': ['v_porechop.txt', r"(\S/+)"],
+    'Nanoplot': ['v_nanoplot.txt', r"NanoPlot (\S+)"],
+    'Porechop': ['v_porechop.txt', r"(\S+)"],
+    'Nanofilt': ['v_nanofilt.txt', r"NanoFilt (\S+)"],
 }
+
 results = OrderedDict()
 results['nf-core/porepatrol'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
