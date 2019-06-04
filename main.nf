@@ -265,7 +265,6 @@ process get_software_versions {
     NanoPlot --version > v_nanoplot.txt
     porechop --version > v_porechop.txt
     NanoFilt --version > v_nanofilt.txt
-
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
