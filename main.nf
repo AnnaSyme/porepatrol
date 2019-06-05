@@ -20,22 +20,24 @@
 
 Channel
     .fromPath(params.reads)
-    .set { input } //enhancement: check that these are fastq files
+    .set { input } 
+    //enhancement: check that these are fastq files or fastq.gz
+
 
 /* Collect multiple input files */
 
-process concatfastqs {
+process concat_fastqs {
+    publishDir "${params.outdir}/concatfastqs", mode: 'copy'
+
     input:
-    file x from input.collect()  //need to collect all files from input
+    file raw_reads from input.collect()  //need to collect all files from input
 
     output:
-    file "inputs.fastq" into concatfastqs // for porechop
+    file "inputs.fastq" into ch_fastq_porechop
 
     script:
-    //enhancement: check if this ever makes a file that is very large
-    //and should be gzipped
     """
-    cat $x > inputs.fastq
+    cat $raw_reads > inputs.fastq
     """
 }
 
@@ -45,15 +47,18 @@ process porechop {
     publishDir "${params.outdir}/porechop", mode: 'copy'
 
     input:
-    file x from concatfastqs
+    file fastq from ch_fastq_porechop  //change these x to be more meaningful
     
     output:
-    file 'chopped.fastq' into chopped1 //for nanoplot
-    file 'chopped.fastq' into chopped2 //for nanofilt
+    file "chopped.fastq" into ch_fastq_nanoplot, ch_fastq_nanofilt
 
     script:
+    //porechop expects fastq files
+    //unable to give process gzipped file as gzip won't work in nextflow
+    //considers the input file "not a regular file"
+
     """
-    porechop -i $x -o chopped.fastq 
+    porechop -i $fastq -o chopped.fastq 
     """
 }
 
@@ -65,14 +70,14 @@ process nanoplot1 {
     publishDir "${params.outdir}/nanoplot1", mode: 'copy'
 
     input:
-    file x from chopped1
+    file fastq from ch_fastq_nanoplot
 
     output:
     file "nanoplot1/*" 
 
     script:
     """
-    NanoPlot --fastq $x -o nanoplot1
+    NanoPlot --fastq $fastq -o nanoplot1
     """
 }
 
@@ -82,14 +87,14 @@ process nanofilt {
     publishDir "${params.outdir}/nanofilt", mode: 'copy'
 
     input: 
-    file x from chopped2
+    file fastq from ch_fastq_nanofilt
 
     output:
-    file 'filtered.fastq' into filtered
+    file 'filtered.fastq' into ch_fastq_filtered
 
     script:
     """
-    NanoFilt ${params.nanofilt_args} < $x > filtered.fastq
+    NanoFilt ${params.nanofilt_args} < $fastq > filtered.fastq
     """
     //enhancement: report if this process was too strict
     //and all reads were filtered out
@@ -101,14 +106,14 @@ process nanoplot2 {
     publishDir "${params.outdir}/nanoplot2", mode: 'copy'
 
     input:
-    file x from filtered
+    file fastq from ch_fastq_filtered
 
     output:
     file "nanoplot2/*" 
 
     script:
     """
-    NanoPlot --fastq $x -o nanoplot2
+    NanoPlot --fastq $fastq -o nanoplot2
     """
 }
 
