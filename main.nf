@@ -24,20 +24,51 @@ Channel
     //enhancement: check that these are fastq files or fastq.gz
 
 
+/* unzip */
+
+
+if ("${params.reads}".endsWith(".gz")) {
+ //Put the zip into a channel, then unzip it and forward to downstream processes.
+
+    gzipped_fastq = file("${params.reads}")
+    rm_gz = params.reads - '.gz' //remove extension first
+
+    process unzip_inputfiles {
+
+        input:
+        file gzipped_fastq
+
+        output:
+        file "*.{fq,fastq}" into ch_input
+
+        script:
+        """
+        pigz -f -d -p $gzipped_fastq
+        """
+        }
+    }
+    else {
+        Channel
+            .fromPath(params.reads)
+            .set { ch_input } 
+
+}
+
+
 /* Collect multiple input files */
 
 process concat_fastqs {
     publishDir "${params.outdir}/concatfastqs", mode: 'copy'
 
     input:
-    file raw_reads from input.collect()  //need to collect all files from input
+    file fastq from input.collect()  //need to collect all files from input
 
     output:
     file "inputs.fastq" into ch_fastq_porechop
 
     script:
     """
-    cat $raw_reads > inputs.fastq
+    cat $fastq > inputs.fastq
     """
 }
 
