@@ -16,15 +16,9 @@
 ========================================================================================
 */
 
-/* input fastq reads into channel */
 
-Channel
-    .fromPath(params.reads)
-    .set { input } 
-    //enhancement: check that these are fastq files or fastq.gz
-
-
-/* unzip */
+/* If gzipped, unzip */
+/* set into input channel */
 
 
 if ("${params.reads}".endsWith(".gz")) {
@@ -43,7 +37,7 @@ if ("${params.reads}".endsWith(".gz")) {
 
         script:
         """
-        pigz -f -d -p $gzipped_fastq
+        gunzip -f $gzipped_fastq
         """
         }
     }
@@ -61,7 +55,7 @@ process concat_fastqs {
     publishDir "${params.outdir}/concatfastqs", mode: 'copy'
 
     input:
-    file fastq from input.collect()  //need to collect all files from input
+    file fastq from ch_input.collect()  //need to collect all files from input
 
     output:
     file "inputs.fastq" into ch_fastq_porechop
