@@ -17,7 +17,7 @@
 */
 
 
-/* If gzipped, unzip */
+/* If input file is gzipped, unzip */
 /* set into input channel */
 
 
@@ -44,7 +44,7 @@ if ("${params.reads}".endsWith(".gz")) {
     else {
         Channel
             .fromPath(params.reads)
-            .set { ch_input } 
+            .set { ch_input }
 
 }
 
@@ -52,17 +52,31 @@ if ("${params.reads}".endsWith(".gz")) {
 /* Collect multiple input files */
 
 process concat_fastqs {
+    echo true
     publishDir "${params.outdir}/concatfastqs", mode: 'copy'
 
     input:
+    file "nanoplot0/*"
     file fastq from ch_input.collect()  //need to collect all files from input
 
     output:
     file "inputs.fastq" into ch_fastq_porechop
+    file "num_reads_start.txt" into ch1
+    file "num_bases_start.txt" into ch2
 
     script:
     """
     cat $fastq > inputs.fastq
+
+    NanoPlot --fastq inputs.fastq -o nanoplot0
+
+    #print line 6: number of reads
+    numreads=\$(echo \$(sed -n 6p nanoplot0/NanoStats.txt))
+    echo After adapter chop: \$numreads > num_reads_start.txt
+
+    #print line 8: number of bases
+    numbases=\$(echo \$(sed -n 8p nanoplot0/NanoStats.txt))
+    echo After adapter chop: \$numbases > num_bases_start.txt
     """
 }
 
@@ -73,7 +87,7 @@ process porechop {
 
     input:
     file fastq from ch_fastq_porechop  //change these x to be more meaningful
-    
+
     output:
     file "chopped.fastq" into ch_fastq_nanoplot, ch_fastq_nanofilt
 
@@ -83,7 +97,7 @@ process porechop {
     //considers the input file "not a regular file"
 
     """
-    porechop -i $fastq -o chopped.fastq 
+    porechop -i $fastq -o chopped.fastq
     """
 }
 
@@ -98,11 +112,21 @@ process nanoplot1 {
     file fastq from ch_fastq_nanoplot
 
     output:
-    file "nanoplot1/*" 
+    file "nanoplot1/*"
+    file "num_reads_after_porechop.txt" into ch3
+    file "num_bases_after_porechop.txt" into ch4
 
     script:
     """
     NanoPlot --fastq $fastq -o nanoplot1
+
+    #print line 6: number of reads
+    numreads=\$(echo \$(sed -n 6p nanoplot1/NanoStats.txt))
+    echo After adapter chop: \$numreads > num_reads_after_porechop.txt
+
+    #print line 8: number of bases
+    numbases=\$(echo \$(sed -n 8p nanoplot1/NanoStats.txt))
+    echo After adapter chop: \$numbases > num_bases_after_porechop.txt
     """
 }
 
@@ -111,7 +135,7 @@ process nanoplot1 {
 process nanofilt {
     publishDir "${params.outdir}/nanofilt", mode: 'copy'
 
-    input: 
+    input:
     file fastq from ch_fastq_nanofilt
 
     output:
@@ -134,13 +158,54 @@ process nanoplot2 {
     file fastq from ch_fastq_filtered
 
     output:
-    file "nanoplot2/*" 
+    file "nanoplot2/*"
+    file "num_reads_after_filter.txt" into ch5
+    file "num_bases_after_filter.txt" into ch6
 
     script:
     """
     NanoPlot --fastq $fastq -o nanoplot2
+
+    #print line 6: number of reads
+    numreads=\$(echo \$(sed -n 6p nanoplot2/NanoStats.txt))
+    echo After filtering: \$numreads > num_reads_after_filter.txt
+
+    #print line 8: number of bases
+    numbases=\$(echo \$(sed -n 8p nanoplot2/NanoStats.txt))
+    echo After filtering: \$numbases > num_bases_after_filter.txt
     """
+//if [[\$numreads -lt 1]] ; then echo WARNING: THERE ARE NO READS LEFT AFTER FILTERING
+
 }
+
+
+process xyz {
+    echo true
+
+    publishDir "${params.outdir}/read_summary", mode: 'copy'
+
+    input:
+    file a from ch1
+    file b from ch2
+    file c from ch3
+    file d from ch4
+    file e from ch5
+    file f from ch6
+
+    output:
+    file "read_summary.txt"
+
+
+    script:
+    """
+    cat $a $c $e $b $d $f | column -t -s: > read_summary.txt
+    """
+
+}
+
+
+
+
 
 /*
 ========================================================================================
@@ -153,7 +218,7 @@ def helpMessage() {
     log.info nfcoreHeader()
     log.info"""
 
-    Usage: 
+    Usage:
 
     nextflow run nf-core/porepatrol --reads "path to fastq files"
 
@@ -203,7 +268,7 @@ if( workflow.profile == 'awsbatch') {
 // Stage config files
 //ch_multiqc_config = Channel.fromPath(params.multiqc_config)
 ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
-
+ch_reads_summary = Channel.fromPath("$params.outdir/concatfastqs/num_bases_after_filter.txt")
 
 // Header log info
 log.info nfcoreHeader()
@@ -267,7 +332,7 @@ process get_software_versions {
 
     output:
     file 'software_versions_mqc.yaml' into software_versions_yaml
-    file "software_versions.csv" 
+    file "software_versions.csv"
 
     script:
     """
@@ -281,7 +346,7 @@ process get_software_versions {
 }
 
 
-/* Output Description HTML */ 
+/* Output Description HTML */
 
 process output_documentation {
     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
@@ -303,7 +368,7 @@ process output_documentation {
  */
 
 workflow.onComplete {
-
+    echo true
     // Set up the e-mail variables
     def subject = "[nf-core/porepatrol] Successful: $workflow.runName"
     if(!workflow.success){
@@ -387,6 +452,12 @@ workflow.onComplete {
 
     if(workflow.success){
         log.info "${c_purple}[nf-core/porepatrol]${c_green} Pipeline completed successfully${c_reset}"
+        println "stuff here"
+        // def readssummary = new File("$params.outdir/read_summary.txt")
+        // println "cat ${readssummary}"
+        //trying to print output summary here 
+
+
     } else {
         checkHostname()
         log.info "${c_purple}[nf-core/porepatrol]${c_red} Pipeline completed with errors${c_reset}"
