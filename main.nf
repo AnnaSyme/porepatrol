@@ -72,11 +72,11 @@ process concat_fastqs {
 
     #print line 6: number of reads
     numreads=\$(echo \$(sed -n 6p nanoplot0/NanoStats.txt))
-    echo After adapter chop: \$numreads > num_reads_start.txt
+    echo Input: \$numreads > num_reads_start.txt
 
     #print line 8: number of bases
     numbases=\$(echo \$(sed -n 8p nanoplot0/NanoStats.txt))
-    echo After adapter chop: \$numbases > num_bases_start.txt
+    echo Input: \$numbases > num_bases_start.txt
     """
 }
 
@@ -179,7 +179,7 @@ process nanoplot2 {
 }
 
 
-process xyz {
+process readsummary {
     echo true
 
     publishDir "${params.outdir}/read_summary", mode: 'copy'
@@ -268,7 +268,7 @@ if( workflow.profile == 'awsbatch') {
 // Stage config files
 //ch_multiqc_config = Channel.fromPath(params.multiqc_config)
 ch_output_docs = Channel.fromPath("$baseDir/docs/output.md")
-ch_reads_summary = Channel.fromPath("$params.outdir/concatfastqs/num_bases_after_filter.txt")
+
 
 // Header log info
 log.info nfcoreHeader()
@@ -455,7 +455,7 @@ workflow.onComplete {
         println "stuff here"
         // def readssummary = new File("$params.outdir/read_summary.txt")
         // println "cat ${readssummary}"
-        //trying to print output summary here 
+        //trying to print output summary here
 
 
     } else {
